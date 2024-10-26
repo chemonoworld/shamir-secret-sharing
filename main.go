@@ -34,7 +34,6 @@ func generateSmallRand() (*big.Int, error) {
 	return new(big.Int).SetBytes(b), nil
 }
 
-// 각 계수를 랜덤한 32bytes로 생성해줌..
 func GenerateCoefficients(k int) ([]*big.Int, error) {
 	coefficients := make([]*big.Int, k)
 
@@ -113,9 +112,6 @@ func LagrangeInterpolation(shares []SecretShare, prime *big.Int) *big.Int {
 }
 
 func main() {
-	//ss := SecretShare{X: big.NewInt(1), Y: big.NewInt(2)}
-	// k = 3, n = 5
-
 	k := 3
 	n := 5
 	coefficients, err := GenerateCoefficients(k)
@@ -129,9 +125,7 @@ func main() {
 	}
 
 	// Lagrange Interpolation
-	// prime 32bytes 최댓값보다 살짝 큰 소수로 해줘
 	prime, _ := new(big.Int).SetString("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16) // 2^256 - 2^32 - 977
-	//prime := new(big.Int).SetInt64(257)
 	result := LagrangeInterpolation(shares, prime)
 	if result.Cmp(coefficients[0]) == 0 {
 		println("Success")
