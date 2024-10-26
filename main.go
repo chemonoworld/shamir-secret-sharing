@@ -19,7 +19,6 @@ func generateRand32Bytes() (*big.Int, error) {
 		return nil, err
 	}
 
-	b[0] = 0x00 // 2^128 이상이 되지 않도록
 	return new(big.Int).SetBytes(b), nil
 }
 
@@ -125,9 +124,12 @@ func main() {
 	}
 
 	// Lagrange Interpolation
-	prime, _ := new(big.Int).SetString("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16) // 2^256 - 2^32 - 977
+	prime := new(big.Int).Exp(big.NewInt(2), big.NewInt(256), nil)
+	prime.Add(prime, big.NewInt(297))
 	result := LagrangeInterpolation(shares, prime)
 	if result.Cmp(coefficients[0]) == 0 {
+		println(result.String())
+		println(coefficients[0].String())
 		println("Success")
 	} else {
 		println(result.String())
