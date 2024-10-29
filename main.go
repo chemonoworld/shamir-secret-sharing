@@ -22,15 +22,28 @@ func generateRand32Bytes() (*big.Int, error) {
 	return new(big.Int).SetBytes(b), nil
 }
 
-func generateSmallRand() (*big.Int, error) {
-	b := make([]byte, 1)
+func generateDistinctRandomInt64s(n int) ([]int64, error) {
+	// 1. Generate n random int64s
+	randomInt64s := make([]int64, n)
+	randMap := make(map[int64]bool)
+	for i := 0; i < n; i++ {
+		b := make([]byte, 8)
 
-	_, err := rand.Read(b)
-	if err != nil {
-		return nil, err
+		_, err := rand.Read(b)
+		if err != nil {
+			return nil, err
+		}
+
+		randomInt64s[i] = int64(b[0]) | int64(b[1])<<8 | int64(b[2])<<16 | int64(b[3])<<24 |
+			int64(b[4])<<32 | int64(b[5])<<40 | int64(b[6])<<48 | int64(b[7])<<56
+		if _, ok := randMap[randomInt64s[i]]; ok {
+			i--
+		} else {
+			randMap[randomInt64s[i]] = true
+		}
 	}
 
-	return new(big.Int).SetBytes(b), nil
+	return randomInt64s, nil
 }
 
 func GenerateCoefficients(k int) ([]*big.Int, error) {
@@ -54,10 +67,14 @@ func ShamirSecretShare(coefficients []*big.Int, k, n int) ([]SecretShare, error)
 	}
 
 	shares := make([]SecretShare, n)
+	distinctPointXs, err := generateDistinctRandomInt64s(n)
+	if err != nil {
+		return nil, err
+	}
 
 	for i := 0; i < n; i++ {
 		// 사실 x도 랜덤하게 만들어주면 보안상 더 좋을 것 같음.
-		x := big.NewInt(int64(i + 1))
+		x := big.NewInt(distinctPointXs[i])
 		y := new(big.Int)
 
 		for j := 0; j < k; j++ {
