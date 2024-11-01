@@ -130,7 +130,10 @@ func LagrangeInterpolation(shares []SecretShare, prime *big.Int) *big.Int {
 func main() {
 	k := 3
 	n := 5
+	prime, _ := new(big.Int).SetString("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16)
+	//prime.Add(prime, big.NewInt(297))
 	coefficients, err := GenerateCoefficients(k)
+	secretKey := coefficients[0].Mod(coefficients[0], prime)
 	if err != nil {
 		panic(err)
 	}
@@ -141,12 +144,10 @@ func main() {
 	}
 
 	// Lagrange Interpolation
-	prime := new(big.Int).Exp(big.NewInt(2), big.NewInt(256), nil)
-	prime.Add(prime, big.NewInt(297))
 	result := LagrangeInterpolation(shares, prime)
-	if result.Cmp(coefficients[0]) == 0 {
+	if result.Cmp(secretKey) == 0 {
 		println(result.String())
-		println(coefficients[0].String())
+		println(secretKey.String())
 		println("Success")
 	} else {
 		println(result.String())
